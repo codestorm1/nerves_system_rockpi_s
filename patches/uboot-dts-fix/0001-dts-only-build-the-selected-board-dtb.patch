@@ -1,0 +1,17 @@
+--- a/dts/Makefile
++++ b/dts/Makefile
+@@ -13,7 +13,13 @@
+ endif
+ 
+ ARCH_PATH := arch/$(ARCH)/dts
+-dtb_depends := arch-dtbs
++# Upstream depends on "arch-dtbs", which unconditionally builds every
++# board's DTB in arch/$(ARCH)/dts via kbuild's "dtbs" target --
++# including long-unmaintained boards (rk3188-radxarock, rk3036-sdk,
++# ...) whose DTS files no longer compile with a modern dtc. We only
++# need this board's own $(DTB), which the rule below already builds
++# directly, so drop the unnecessary whole-tree dependency.
++dtb_depends :=
+ 
+ ifneq ($(EXT_DTB),)
+ DTB := $(EXT_DTB)

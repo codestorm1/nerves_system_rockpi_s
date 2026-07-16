@@ -1,0 +1,11 @@
+/_build
+/deps
+/.nerves
+/fwup.conf
+*.ez
+erl_crash.dump
+_build/
+.nerves/
+*.log
+fwup.conf.before-fat-boot
+fwup.conf.eex.before-fat-boot

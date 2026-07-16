@@ -1,0 +1,144 @@
+# nerves_defconfig for the Radxa ROCK Pi S (RK3308, aarch64 cortex-a35)
+#
+# Boot chain and package selections below are carried over from the
+# known-working plain-Buildroot config in ../buildroot.rockchip.ext
+# (board/RK3308, configs/rockpis_defconfig) -- that config has been
+# confirmed by Radxa to boot on this hardware. This file adapts it to
+# Nerves' BR2_EXTERNAL (nerves_system_br) conventions.
+
+# --- toolchain ---
+BR2_aarch64=y
+BR2_TOOLCHAIN_EXTERNAL=y
+BR2_TOOLCHAIN_EXTERNAL_CUSTOM=y
+BR2_TOOLCHAIN_EXTERNAL_DOWNLOAD=y
+BR2_TOOLCHAIN_EXTERNAL_URL="https://github.com/nerves-project/toolchains/releases/download/v15.3.0/nerves_toolchain_aarch64_nerves_linux_gnu-linux_${shell uname -m}-15.3.0-8DAF9F3.tar.xz"
+BR2_TOOLCHAIN_EXTERNAL_CUSTOM_PREFIX="aarch64-nerves-linux-gnu"
+BR2_TOOLCHAIN_EXTERNAL_HEADERS_6_0=y
+BR2_TOOLCHAIN_EXTERNAL_CUSTOM_GLIBC=y
+# BR2_TOOLCHAIN_EXTERNAL_INET_RPC is not set
+BR2_TOOLCHAIN_EXTERNAL_CXX=y
+BR2_TOOLCHAIN_EXTERNAL_FORTRAN=y
+BR2_TOOLCHAIN_EXTERNAL_OPENMP=y
+
+# --- common nerves system boilerplate (same for every Nerves system) ---
+BR2_TAR_OPTIONS="--no-same-owner"
+BR2_BACKUP_SITE="https://dl.nerves-project.org"
+BR2_ENABLE_DEBUG=y
+BR2_GLOBAL_PATCH_DIR="${BR2_EXTERNAL_NERVES_PATH}/patches ${NERVES_DEFCONFIG_DIR}/patches"
+BR2_REPRODUCIBLE=y
+BR2_ROOTFS_SKELETON_CUSTOM=y
+BR2_ROOTFS_SKELETON_CUSTOM_PATH="${BR2_EXTERNAL_NERVES_PATH}/board/nerves-common/skeleton"
+BR2_INIT_NONE=y
+BR2_ROOTFS_DEVICE_TABLE="${BR2_EXTERNAL_NERVES_PATH}/board/nerves-common/device_table.txt"
+BR2_ENABLE_LOCALE_WHITELIST="locale-archive"
+BR2_GENERATE_LOCALE="en_US.UTF-8"
+BR2_ROOTFS_OVERLAY="${BR2_EXTERNAL_NERVES_PATH}/board/nerves-common/rootfs_overlay ${NERVES_DEFCONFIG_DIR}/rootfs_overlay"
+BR2_ROOTFS_POST_BUILD_SCRIPT="${NERVES_DEFCONFIG_DIR}/post-build.sh ${BR2_EXTERNAL_NERVES_PATH}/board/nerves-common/post-build.sh"
+BR2_ROOTFS_POST_IMAGE_SCRIPT="${NERVES_DEFCONFIG_DIR}/post-createfs.sh"
+# BR2_TARGET_ROOTFS_TAR is not set
+
+# This is the switch that turns on Erlang/erlinit/fwup/nerves_heart/etc,
+# i.e. what actually makes this a Nerves system instead of plain Buildroot.
+BR2_PACKAGE_NERVES_CONFIG=y
+BR2_PACKAGE_NERVES_CONFIG_ACCEPT_RNG_NOTICE=y
+BR2_PACKAGE_NBTTY=y
+BR2_NERVES_SYSTEM_NAME="nerves_system_rockpi_s"
+
+# --- Linux kernel: piter75/rockchip-kernel, same pin as the working
+#     buildroot.rockchip.ext config ---
+BR2_LINUX_KERNEL=y
+BR2_LINUX_KERNEL_CUSTOM_GIT=y
+BR2_LINUX_KERNEL_CUSTOM_REPO_URL="https://github.com/piter75/rockchip-kernel.git"
+BR2_LINUX_KERNEL_CUSTOM_REPO_VERSION="6c923e306e11a9fa60bae4c319bdb0da9ba38f08"
+BR2_LINUX_KERNEL_DEFCONFIG="rk3308_linux"
+BR2_LINUX_KERNEL_IMAGE=y
+BR2_LINUX_KERNEL_DTS_SUPPORT=y
+BR2_LINUX_KERNEL_INTREE_DTS_NAME="rockchip/rk3308-rock-pi-s"
+BR2_LINUX_KERNEL_INSTALL_TARGET=y
+BR2_LINUX_KERNEL_NEEDS_HOST_OPENSSL=y
+
+# This kernel's Makefile routes all compilation through
+# scripts/gcc-wrapper.py, an Android/AOSP-style wrapper that hard-fails
+# the build on any compiler warning not in its hardcoded per-file/
+# per-line allowlist -- tuned for whatever GCC was around when this
+# vendor tree was last touched. nerves_system_br's much newer toolchain
+# (GCC 15.x) trips several warnings (-Waddress in kernel/cpu.c, etc.)
+# that aren't on that list and aren't real bugs. Disabled rather than
+# extend an allowlist tied to exact GCC diagnostic text -- see
+# patches/linux-gcc-wrapper/ for details. (Not named patches/linux/: that
+# name would collide with BR2_GLOBAL_PATCH_DIR's package-name-matching
+# convention -- see the libnl/BR2_KERNEL_HEADERS comment below.)
+BR2_LINUX_KERNEL_PATCH="${NERVES_DEFCONFIG_DIR}/patches/linux-gcc-wrapper"
+
+# --- U-Boot: radxa/u-boot, same pin as the working buildroot.rockchip.ext
+#     config ---
+BR2_TARGET_UBOOT=y
+BR2_TARGET_UBOOT_BUILD_SYSTEM_KCONFIG=y
+BR2_TARGET_UBOOT_USE_DEFCONFIG=y
+BR2_TARGET_UBOOT_CUSTOM_GIT=y
+BR2_TARGET_UBOOT_CUSTOM_REPO_URL="https://github.com/radxa/u-boot.git"
+BR2_TARGET_UBOOT_BOARD_DEFCONFIG="rock-pi-s-rk3308"
+BR2_TARGET_UBOOT_CUSTOM_REPO_VERSION="233a23e3ed0b3e5250253ee455c3c5df2080f99c"
+BR2_TARGET_UBOOT_NEEDS_DTC=y
+BR2_TARGET_UBOOT_FORMAT_BIN=y
+BR2_TARGET_UBOOT_SPL=n
+BR2_TARGET_UBOOT_CONFIG_FRAGMENT_FILES="${NERVES_DEFCONFIG_DIR}/uboot.fragment"
+BR2_PACKAGE_HOST_DTC=y
+
+# This ~2020-era U-Boot fork doesn't build clean under the much newer GCC
+# (15.x) that nerves_system_br's toolchain uses -- e.g. common/command.c's
+# cmd_process() is declared `int` in the header but defined as
+# `enum command_ret_t`, which only GCC's newer -Wenum-int-mismatch catches,
+# and U-Boot's build treats warnings as errors. Buildroot's own internal
+# (older) toolchain in the plain buildroot.rockchip.ext build doesn't hit
+# this, which is why Phase 0 built clean. Relax -Werror here rather than
+# patch individual mismatches, since there may be more than one.
+BR2_TARGET_UBOOT_CUSTOM_MAKEOPTS="KCFLAGS=-Wno-error"
+
+# This fork's dts/Makefile makes building our board's DTB depend on
+# building *every* board's DTB in arch/arm/dts (a "make dtbs" style
+# target), including long-unmaintained ones (rk3188-radxarock,
+# rk3036-sdk) whose DTS no longer compiles with a modern dtc. Patch that
+# out -- see patches/uboot-dts-fix/ for details. (Not named patches/uboot/:
+# that name would collide with BR2_GLOBAL_PATCH_DIR's package-name-
+# matching convention used below for libnl.)
+BR2_TARGET_UBOOT_PATCH="${NERVES_DEFCONFIG_DIR}/patches/uboot-dts-fix"
+
+# Bake uboot/boot.env (the Nerves A/B boot logic) into a raw uboot-env.bin
+# at build time. This becomes a real U-Boot environment once fwup writes
+# it to CONFIG_ENV_OFFSET (see uboot.fragment) at provisioning time.
+BR2_PACKAGE_HOST_UBOOT_TOOLS=y
+BR2_PACKAGE_HOST_UBOOT_TOOLS_ENVIMAGE=y
+BR2_PACKAGE_HOST_UBOOT_TOOLS_ENVIMAGE_SOURCE="${NERVES_DEFCONFIG_DIR}/uboot/boot.env"
+BR2_PACKAGE_HOST_UBOOT_TOOLS_ENVIMAGE_SIZE="32768"
+
+# --- Rockchip binary blobs (idbloader DDR init / ATF bl31 / trust_merger
+#     etc. tools), packaged by package/rkbin (ported from
+#     buildroot.rockchip.ext/package/rkbin) ---
+BR2_PACKAGE_RKBIN=y
+
+# nerves_pack's nerves_uevent NIF needs this for netlink/hotplug support --
+# not optional despite looking like generic networking cruft (found via
+# a real "mix firmware" failure in a companion app, not carried over
+# speculatively).
+BR2_PACKAGE_LIBMNL=y
+
+# nerves_pack's vintage_net_wifi (nl80211) needs this. Same story as
+# libmnl above -- found via a real build failure, not speculative.
+BR2_PACKAGE_LIBNL=y
+
+# linux.mk unconditionally re-runs `make headers_install` from OUR
+# RK3308 kernel fork into $(STAGING_DIR)/usr, *after* the external
+# toolchain already staged its own complete headers there -- clobbering
+# them. Our vendor kernel fork is ~2016-era, so this leaves
+# staging/usr/include/linux/ila.h missing attributes (ILA_ATTR_CSUM_MODE/
+# IDENT_TYPE/HOOK_TYPE) that libnl 3.12.0 needs, causing real compile
+# errors, not warnings. There's no Config.in toggle for this (it's
+# unconditional in nerves_system_br's own patches/buildroot/0012-*
+# patch), so libnl gets its own private, complete copy of that one
+# header instead -- see patches/libnl/.
+
+
+# --- busybox ---
+BR2_PACKAGE_BUSYBOX_CONFIG="${BR2_EXTERNAL_NERVES_PATH}/board/nerves-common/busybox.config"
+BR2_PACKAGE_BUSYBOX_CONFIG_FRAGMENT_FILES="${NERVES_DEFCONFIG_DIR}/busybox.fragment"

@@ -1,0 +1,17 @@
+CONFIG_BAUDRATE=115200
+
+# Store the U-Boot environment (incl. Nerves' A/B slot metadata) on the
+# SD/eMMC at a fixed offset we control, in the gap between the trust.img
+# blob (ends well before 15M) and the dummy boot partition (starts at
+# 16M). Keep this in sync with UBOOT_ENV_OFFSET/UBOOT_ENV_COUNT in
+# fwup_include/fwup-common.conf and
+# BR2_PACKAGE_HOST_UBOOT_TOOLS_ENVIMAGE_SIZE in nerves_defconfig --
+# DRAFT, not yet verified against real hardware/build output.
+CONFIG_ENV_IS_IN_MMC=y
+CONFIG_SYS_MMC_ENV_DEV=0
+CONFIG_ENV_OFFSET=0xF00000
+CONFIG_ENV_SIZE=0x20000
+CONFIG_ENV_OVERWRITE=y
+CONFIG_DOS_PARTITION=y
+CONFIG_DOS_PARTITION=y
+CONFIG_ENV_OVERWRITE=y
