@@ -1,0 +1,36 @@
+From: Nerves ROCK Pi S maintainers <noreply@example.com>
+Subject: [PATCH] make Rockchip environment options configurable
+
+The Radxa 2017.09 fork keeps the Rockchip environment size and offset as
+non-visible Kconfig symbols, and CONFIG_ENV_OVERWRITE is still a legacy
+preprocessor-only option. Expose them so Buildroot fragments can set them.
+---
+ env/Kconfig | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/env/Kconfig b/env/Kconfig
+--- a/env/Kconfig
++++ b/env/Kconfig
+@@ -441,12 +441,18 @@ config ENV_OFFSET
+-	hex
++	hex "Environment offset"
+ 	depends on !ENV_IS_IN_UBI
+ 	depends on !ENV_IS_NOWHERE
+ 	default 0x3f8000
+ 	help
+ 	  Offset from the start of the device (or partition)
+ 
+ config ENV_SIZE
+-	hex
++	hex "Environment size"
+ 	default 0x8000
+ 	help
+ 	  Size of the environment storage area
++
++config ENV_OVERWRITE
++	bool "Allow board code to overwrite protected environment variables"
++	default n
++	help
++	  Permit protected variables such as serial# to be replaced.
+-- 
+2.43.0

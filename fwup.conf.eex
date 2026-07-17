@@ -35,6 +35,9 @@ file-resource kernel.img {
 file-resource board.dtb {
     host-path = "${NERVES_SYSTEM}/images/rk3308-rock-pi-s.dtb"
 }
+file-resource boot.scr {
+    host-path = "${NERVES_SYSTEM}/images/boot.scr"
+}
 
 file-resource rootfs.img {
     host-path = ${ROOTFS}
@@ -121,6 +124,9 @@ task complete {
 
     on-resource board.dtb {
         fat_write(${BOOT_PART_OFFSET}, "rk3308-rock-pi-s.dtb")
+    }
+    on-resource boot.scr {
+        fat_write(${BOOT_PART_OFFSET}, "boot.scr")
     }
 
     on-resource rootfs.img {

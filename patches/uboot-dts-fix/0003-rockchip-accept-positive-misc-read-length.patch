@@ -1,0 +1,33 @@
+From: Nerves ROCK Pi S maintainers <noreply@example.com>
+Subject: [PATCH] rockchip: accept positive misc_read length
+
+The RK3308 OTP misc driver returns the number of bytes read on success.
+The generic Rockchip CPUID helpers incorrectly treat every non-zero return as
+an error, causing misc_init_r() to return -1 and abort the initcall sequence.
+---
+ arch/arm/mach-rockchip/misc.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-rockchip/misc.c b/arch/arm/mach-rockchip/misc.c
+--- a/arch/arm/mach-rockchip/misc.c
++++ b/arch/arm/mach-rockchip/misc.c
+@@ -69,7 +69,7 @@ int rockchip_cpuid_from_efuse(const u32 cpuid_offset,
+ 
+ 	/* read the cpu_id range from the efuses */
+ 	ret = misc_read(dev, cpuid_offset, cpuid, cpuid_length);
+-	if (ret) {
++	if (ret < 0) {
+ 		debug("%s: reading cpuid from the efuses failed\n",
+ 		      __func__);
+ 		return -1;
+@@ -96,7 +96,7 @@ int rockchip_cpuid_from_otp(const u32 cpuid_offset,
+ 
+ 	/* read the cpu_id range from the otp */
+ 	ret = misc_read(dev, cpuid_offset, cpuid, cpuid_length);
+-	if (ret) {
++	if (ret < 0) {
+ 		debug("%s: reading cpuid from the otp failed\n",
+ 		      __func__);
+ 		return -1;
+-- 
+2.43.0

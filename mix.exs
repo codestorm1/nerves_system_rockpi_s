@@ -77,6 +77,7 @@ defmodule NervesSystemRockpiS.MixProject do
       "external.mk",
       "fwup.conf.eex",
       "fwup_include",
+      "linux.fragment",
       "mix.exs",
       "nerves_defconfig",
       "patches",
@@ -93,7 +94,11 @@ defmodule NervesSystemRockpiS.MixProject do
     # LICENSES/ directory buildroot's linux.mk expects for it, so it
     # fails trying to copy a license file that doesn't exist here. It's
     # a compliance-report step with no effect on the firmware itself.
-    [make_args: primary_site() ++ ["source", "all"]]
+    # The old Radxa U-Boot tree has produced intermittent host compiler
+    # SIGBUS failures at Buildroot's automatic -j17 on the bring-up host.
+    # Four jobs has been verified with a clean U-Boot rebuild and still keeps
+    # the build reasonably parallel.
+    [make_args: primary_site() ++ ["PARALLEL_JOBS=4", "source", "all"]]
   end
 
   defp primary_site() do

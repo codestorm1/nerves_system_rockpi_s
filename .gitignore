@@ -7,5 +7,6 @@ erl_crash.dump
 _build/
 .nerves/
 *.log
+*.tar.gz
 fwup.conf.before-fat-boot
 fwup.conf.eex.before-fat-boot

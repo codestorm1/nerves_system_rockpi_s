@@ -36,6 +36,26 @@ if [ -z "$UBOOT_BUILD_DIR" ]; then
     exit 1
 fi
 
+# Do not silently package a stale/default-configured U-Boot. The Radxa fork
+# needs a small Kconfig compatibility patch before these fragment settings can
+# survive olddefconfig.
+for expected in \
+    'CONFIG_ENV_IS_NOWHERE=y' \
+    'CONFIG_DOS_PARTITION=y'; do
+    if ! grep -qx "$expected" "$UBOOT_BUILD_DIR/.config"; then
+        echo "ERROR: U-Boot .config is missing: $expected"
+        echo "Run 'make uboot-dirclean uboot' in the Buildroot output directory."
+        exit 1
+    fi
+done
+
+# Persistent MMC environment corrupts the Linux handoff in this vendor U-Boot.
+# Boot through a standard distro boot script while ENV_IS_NOWHERE is selected.
+"$HOST_DIR/bin/mkimage" -A arm64 -T script -C none \
+    -n "Nerves ROCK Pi S boot" \
+    -d "$NERVES_DEFCONFIG_DIR/uboot/boot.cmd" \
+    "$BINARIES_DIR/boot.scr"
+
 # Pack U-Boot proper into the Rockchip loaderimage format
 "$RKTOOLS/loaderimage" --pack --uboot "$UBOOT_BUILD_DIR/u-boot-dtb.bin" "$BINARIES_DIR/uboot.img" 0x600000 --size 1024 1
 

@@ -1,0 +1,23 @@
+From: ROCK Pi S Buildroot maintainers <noreply@example.com>
+Subject: [PATCH] u-boot: disable address-of-packed-member warning
+
+The vendor U-Boot enables -Werror and contains packed GPT structures whose
+members are passed by address. Match the known-working ROCK Pi S Buildroot
+patch so GCC 10 and later can compile the tree.
+---
+ Makefile | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Makefile b/Makefile
+--- a/Makefile
++++ b/Makefile
+@@ -360,6 +360,7 @@ KBUILD_CPPFLAGS := -D__KERNEL__ -D__UBOOT__
+ KBUILD_CFLAGS   := -Wall -Wstrict-prototypes \
+ 		   -Wno-format-security \
+ 		   -fno-builtin -ffreestanding
++KBUILD_CFLAGS += $(call cc-disable-warning, address-of-packed-member)
+ KBUILD_CFLAGS	+= -fshort-wchar -Werror
+ KBUILD_AFLAGS   := -D__ASSEMBLY__
+ 
+-- 
+2.43.0

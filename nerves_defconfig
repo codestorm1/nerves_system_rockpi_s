@@ -11,9 +11,8 @@ BR2_aarch64=y
 BR2_TOOLCHAIN_EXTERNAL=y
 BR2_TOOLCHAIN_EXTERNAL_CUSTOM=y
 BR2_TOOLCHAIN_EXTERNAL_DOWNLOAD=y
-BR2_TOOLCHAIN_EXTERNAL_URL="https://github.com/nerves-project/toolchains/releases/download/v15.3.0/nerves_toolchain_aarch64_nerves_linux_gnu-linux_${shell uname -m}-15.3.0-8DAF9F3.tar.xz"
+BR2_TOOLCHAIN_EXTERNAL_URL="https://github.com/nerves-project/toolchains/releases/download/v14.2.0/nerves_toolchain_aarch64_nerves_linux_gnu-linux_x86_64-14.2.0-C3B80E7.tar.xz"
 BR2_TOOLCHAIN_EXTERNAL_CUSTOM_PREFIX="aarch64-nerves-linux-gnu"
-BR2_TOOLCHAIN_EXTERNAL_HEADERS_6_0=y
 BR2_TOOLCHAIN_EXTERNAL_CUSTOM_GLIBC=y
 # BR2_TOOLCHAIN_EXTERNAL_INET_RPC is not set
 BR2_TOOLCHAIN_EXTERNAL_CXX=y
@@ -69,6 +68,7 @@ BR2_LINUX_KERNEL_NEEDS_HOST_OPENSSL=y
 # name would collide with BR2_GLOBAL_PATCH_DIR's package-name-matching
 # convention -- see the libnl/BR2_KERNEL_HEADERS comment below.)
 BR2_LINUX_KERNEL_PATCH="${NERVES_DEFCONFIG_DIR}/patches/linux-gcc-wrapper"
+BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="${NERVES_DEFCONFIG_DIR}/linux.fragment"
 
 # --- U-Boot: radxa/u-boot, same pin as the working buildroot.rockchip.ext
 #     config ---
@@ -127,6 +127,10 @@ BR2_PACKAGE_LIBMNL=y
 # libmnl above -- found via a real build failure, not speculative.
 BR2_PACKAGE_LIBNL=y
 
+# Releases are assembled by the host Erlang VM. Keep the target OTP major in
+# sync with the project's host OTP; OTP 27 cannot parse OTP 29 BEAM atom chunks.
+BR2_PACKAGE_ERLANG_27=y
+
 # linux.mk unconditionally re-runs `make headers_install` from OUR
 # RK3308 kernel fork into $(STAGING_DIR)/usr, *after* the external
 # toolchain already staged its own complete headers there -- clobbering
@@ -142,3 +146,7 @@ BR2_PACKAGE_LIBNL=y
 # --- busybox ---
 BR2_PACKAGE_BUSYBOX_CONFIG="${BR2_EXTERNAL_NERVES_PATH}/board/nerves-common/busybox.config"
 BR2_PACKAGE_BUSYBOX_CONFIG_FRAGMENT_FILES="${NERVES_DEFCONFIG_DIR}/busybox.fragment"
+
+BR2_TOOLCHAIN_EXTERNAL_GCC_14=y
+
+BR2_TOOLCHAIN_EXTERNAL_HEADERS_5_4=y
