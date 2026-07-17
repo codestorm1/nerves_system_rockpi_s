@@ -77,6 +77,7 @@ defmodule NervesSystemRockpiS.MixProject do
       "external.mk",
       "fwup.conf.eex",
       "fwup_include",
+      "known_good",
       "linux.fragment",
       "mix.exs",
       "nerves_defconfig",
