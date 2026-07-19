@@ -6,8 +6,8 @@ RK3308 ROCK Pi S hardware the FIQ debugger fails to install its NMI handler,
 then leaves the serial stream undecodable. Keep the early console and normal
 console on UART0 at 115200 and do not enable the FIQ debugger.
 ---
- arch/arm64/boot/dts/rockchip/rk3308-rock-s0.dts | 9 ++++++---
- 1 file changed, 6 insertions(+), 3 deletions(-)
+ arch/arm64/boot/dts/rockchip/rk3308-rock-s0.dts | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/rockchip/rk3308-rock-s0.dts b/arch/arm64/boot/dts/rockchip/rk3308-rock-s0.dts
 --- a/arch/arm64/boot/dts/rockchip/rk3308-rock-s0.dts
@@ -21,13 +21,17 @@ diff --git a/arch/arm64/boot/dts/rockchip/rk3308-rock-s0.dts b/arch/arm64/boot/d
  	};
  
  	leds {
-@@ -299,10 +299,13 @@
+@@ -299,10 +299,17 @@
  };
  
  &fiq_debugger {
 -	status = "okay";
 -	rockchip,serial-id = <0>;
 +	status = "disabled";
++};
++
++&wdt {
++	status = "okay";
 +};
 +
 +&uart0 {
