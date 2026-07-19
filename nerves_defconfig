@@ -126,6 +126,9 @@ BR2_PACKAGE_LIBMNL=y
 # libmnl above -- found via a real build failure, not speculative.
 BR2_PACKAGE_LIBNL=y
 
+# Format the application-data partition mounted at /root on first boot.
+BR2_PACKAGE_E2FSPROGS=y
+
 # Userspace support for the RK3308 audio devices exposed by the kernel.
 BR2_PACKAGE_ALSA_LIB=y
 BR2_PACKAGE_ALSA_UTILS=y
