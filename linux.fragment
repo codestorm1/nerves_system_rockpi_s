@@ -4,3 +4,7 @@ CONFIG_IP_MULTIPLE_TABLES=y
 
 # The Nerves application-data partition is formatted and mounted as ext4.
 CONFIG_EXT4_FS=y
+
+# Mount the FAT boot partition from Linux when servicing boot.scr.
+CONFIG_NLS_CODEPAGE_437=y
+CONFIG_NLS_ISO8859_1=y
