@@ -127,6 +127,12 @@ BR2_PACKAGE_LIBMNL=y
 # libmnl above -- found via a real build failure, not speculative.
 BR2_PACKAGE_LIBNL=y
 
+# Userspace support for the RK3308 audio devices exposed by the kernel.
+BR2_PACKAGE_ALSA_LIB=y
+BR2_PACKAGE_ALSA_UTILS=y
+BR2_PACKAGE_ALSA_UTILS_APLAY=y
+BR2_PACKAGE_ALSA_UTILS_AMIXER=y
+
 # Releases are assembled by the host Erlang VM. Keep the target OTP major in
 # sync with the project's host OTP; OTP 27 cannot parse OTP 29 BEAM atom chunks.
 BR2_PACKAGE_ERLANG_27=y
