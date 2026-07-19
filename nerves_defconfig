@@ -43,26 +43,25 @@ BR2_PACKAGE_NERVES_CONFIG_ACCEPT_RNG_NOTICE=y
 BR2_PACKAGE_NBTTY=y
 BR2_NERVES_SYSTEM_NAME="nerves_system_rockpi_s"
 
-# --- Linux kernel: piter75/rockchip-kernel, same pin as the working
-#     buildroot.rockchip.ext config ---
+# --- Linux kernel: Radxa's RK3308 Linux 5.10 Buildroot branch ---
 BR2_LINUX_KERNEL=y
 BR2_LINUX_KERNEL_CUSTOM_GIT=y
-BR2_LINUX_KERNEL_CUSTOM_REPO_URL="https://github.com/piter75/rockchip-kernel.git"
-BR2_LINUX_KERNEL_CUSTOM_REPO_VERSION="6c923e306e11a9fa60bae4c319bdb0da9ba38f08"
+BR2_LINUX_KERNEL_CUSTOM_REPO_URL="https://github.com/radxa/kernel.git"
+BR2_LINUX_KERNEL_CUSTOM_REPO_VERSION="linux-5.10-gen-rkr8-buildroot"
 BR2_LINUX_KERNEL_DEFCONFIG="rk3308_linux"
 BR2_LINUX_KERNEL_IMAGE=y
 BR2_LINUX_KERNEL_DTS_SUPPORT=y
-BR2_LINUX_KERNEL_INTREE_DTS_NAME="rockchip/rk3308-rock-pi-s"
+BR2_LINUX_KERNEL_INTREE_DTS_NAME="rockchip/rk3308-rock-s0"
 BR2_LINUX_KERNEL_INSTALL_TARGET=y
 BR2_LINUX_KERNEL_NEEDS_HOST_OPENSSL=y
 
-# This kernel's Makefile routes all compilation through
+# This vendor kernel's Makefile routes GCC compilation through
 # scripts/gcc-wrapper.py, an Android/AOSP-style wrapper that hard-fails
 # the build on any compiler warning not in its hardcoded per-file/
 # per-line allowlist -- tuned for whatever GCC was around when this
 # vendor tree was last touched. nerves_system_br's much newer toolchain
 # (GCC 15.x) trips several warnings (-Waddress in kernel/cpu.c, etc.)
-# that aren't on that list and aren't real bugs. Disabled rather than
+# that aren't on that list and aren't real bugs. Disable it rather than
 # extend an allowlist tied to exact GCC diagnostic text -- see
 # patches/linux-gcc-wrapper/ for details. (Not named patches/linux/: that
 # name would collide with BR2_GLOBAL_PATCH_DIR's package-name-matching
@@ -137,16 +136,9 @@ BR2_PACKAGE_ALSA_UTILS_AMIXER=y
 # sync with the project's host OTP; OTP 27 cannot parse OTP 29 BEAM atom chunks.
 BR2_PACKAGE_ERLANG_27=y
 
-# linux.mk unconditionally re-runs `make headers_install` from OUR
-# RK3308 kernel fork into $(STAGING_DIR)/usr, *after* the external
-# toolchain already staged its own complete headers there -- clobbering
-# them. Our vendor kernel fork is ~2016-era, so this leaves
-# staging/usr/include/linux/ila.h missing attributes (ILA_ATTR_CSUM_MODE/
-# IDENT_TYPE/HOOK_TYPE) that libnl 3.12.0 needs, causing real compile
-# errors, not warnings. There's no Config.in toggle for this (it's
-# unconditional in nerves_system_br's own patches/buildroot/0012-*
-# patch), so libnl gets its own private, complete copy of that one
-# header instead -- see patches/libnl/.
+# Keep the libnl compatibility patch for now; it is harmless with the
+# newer kernel headers and can be removed after a complete clean build
+# confirms that the 5.10 headers no longer need it.
 
 
 # --- busybox ---

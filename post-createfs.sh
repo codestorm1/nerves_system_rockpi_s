@@ -83,17 +83,11 @@ EOF
 "$UBOOT_BUILD_DIR/tools/mkimage" -n rk3308 -T rksd -d "$BOARD_DIR/rk3308_ddr_589MHz_uart0_m0_v1.26.bin" "$BINARIES_DIR/idbloader.img"
 cat "$BOARD_DIR/rk3308_miniloader_emmc_port_support_sd_20190717.bin" >> "$BINARIES_DIR/idbloader.img"
 
-# Reproducible bring-up checkpoint. These checksummed components are the exact
-# U-Boot/kernel combination that booted Nerves on real ROCK Pi S hardware.
-# Keep this override until the reference kernel patch series and persistent
-# U-Boot environment are fully reproduced from source.
+# Reproducible U-Boot bring-up checkpoint. Keep the bootloader override until
+# the persistent U-Boot environment is fully reproduced from source. The
+# kernel and DTB intentionally come from the current Buildroot build.
 KNOWN_GOOD="$NERVES_DEFCONFIG_DIR/known_good"
 cp "$KNOWN_GOOD/uboot.img" "$BINARIES_DIR/uboot.img"
-cp "$KNOWN_GOOD/Image" "$BINARIES_DIR/Image"
-"$HOST_DIR/bin/fdtoverlay" \
-    -i "$KNOWN_GOOD/rockchip/rk3308-rock-pi-s.dtb" \
-    -o "$BINARIES_DIR/rk3308-rock-pi-s.dtb" \
-    "$KNOWN_GOOD/rockchip/overlays/rk3308-uart0.dtbo"
 
 # fwup.conf.eex includes fwup_include/fwup-common.conf at fwup-runtime
 # via ${NERVES_SDK_IMAGES}, which resolves to this images dir in the

@@ -1,0 +1,41 @@
+From: Nerves ROCK Pi S maintainers <noreply@example.com>
+Subject: [PATCH] arm64: dts: rock-s0: use UART0 console at 115200
+
+The vendor DTS routes the console through ttyFIQ0 at 1.5 Mbaud. On the
+RK3308 ROCK Pi S hardware the FIQ debugger fails to install its NMI handler,
+then leaves the serial stream undecodable. Keep the early console and normal
+console on UART0 at 115200 and do not enable the FIQ debugger.
+---
+ arch/arm64/boot/dts/rockchip/rk3308-rock-s0.dts | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/rockchip/rk3308-rock-s0.dts b/arch/arm64/boot/dts/rockchip/rk3308-rock-s0.dts
+--- a/arch/arm64/boot/dts/rockchip/rk3308-rock-s0.dts
++++ b/arch/arm64/boot/dts/rockchip/rk3308-rock-s0.dts
+@@ -14,7 +14,7 @@
+ 	compatible = "radxa,rock-s0", "rockchip,rk3308";
+ 
+ 	chosen {
+-		bootargs = "earlycon=uart8250,mmio32,0xff0a0000 console=ttyFIQ0 rw root=PARTUUID=614e0000-0000 rootfstype=ext4 rootwait snd_aloop.index=7 snd_aloop.use_raw_jiffies=1";
++		bootargs = "earlycon=uart8250,mmio32,0xff0a0000 console=ttyS0,115200n8 rw root=/dev/mmcblk2p2 rootfstype=squashfs rootwait snd_aloop.index=7 snd_aloop.use_raw_jiffies=1";
+ 	};
+ 
+ 	leds {
+@@ -299,10 +299,13 @@
+ };
+ 
+ &fiq_debugger {
+-	status = "okay";
+-	rockchip,serial-id = <0>;
++	status = "disabled";
++};
++
++&uart0 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&uart0_xfer>;
++	status = "okay";
+ };
+ 
+ &u2phy {
+-- 
+2.43.0
