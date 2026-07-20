@@ -7,10 +7,10 @@ wireless and no-wireless board variants so absent AP6212 hardware is neither
 probed nor lost as a supported configuration.
 ---
  arch/arm64/boot/dts/rockchip/Makefile                         | 2 +
- arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s.dtsi           | 397 ++++++++++++++++++++
+ arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s.dtsi           | 420 ++++++++++++++++++++
  arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s-no-wireless.dts| 10 +
  arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s-wireless.dts   | 22 +
- 4 files changed, 431 insertions(+)
+ 4 files changed, 454 insertions(+)
  create mode 100644 arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s.dtsi
  create mode 100644 arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s-no-wireless.dts
  create mode 100644 arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s-wireless.dts
@@ -31,7 +31,7 @@ diff --git a/arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s.dtsi b/arch/arm64/boo
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s.dtsi
-@@ -0,0 +1,397 @@
+@@ -0,0 +1,420 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * Copyright (c) 2018 Fuzhou Rockchip Electronics Co., Ltd
@@ -232,6 +232,20 @@ new file mode 100644
 +		rockchip,cpu = <&i2s_8ch_2>;
 +		rockchip,codec = <&acodec>;
 +     };
++
++	i2s_rx_sound: i2s-rx-sound {
++		compatible = "simple-audio-card";
++		simple-audio-card,format = "i2s";
++		simple-audio-card,name = "rockpi-s-i2s-rx";
++		simple-audio-card,bitclock-master = <&i2s_rx_codec>;
++		simple-audio-card,frame-master = <&i2s_rx_codec>;
++		simple-audio-card,cpu {
++			sound-dai = <&i2s_8ch_0>;
++		};
++		i2s_rx_codec: simple-audio-card,codec {
++			sound-dai = <&dummy_codec>;
++		};
++	};
 +};
 +
 +&cpu0 {
@@ -295,6 +309,15 @@ new file mode 100644
 +&i2c1 {
 +	clock-frequency = <100000>;
 +	status = "okay";
++};
++
++&i2s_8ch_0 {
++	status = "okay";
++	#sound-dai-cells = <0>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&i2s_8ch_0_sclkrx
++		     &i2s_8ch_0_lrckrx
++		     &i2s_8ch_0_sdi0>;
 +};
 +
 +&i2s_8ch_2 {
