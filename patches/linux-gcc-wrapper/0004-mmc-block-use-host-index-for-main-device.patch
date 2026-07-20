@@ -1,0 +1,25 @@
+From: Nerves ROCK Pi S maintainers <noreply@example.com>
+Subject: [PATCH] mmc: block: use host index for main device
+
+The MMC core honors device-tree aliases for host numbering, but the block
+driver independently assigns the first free mmcblk index as cards finish
+probing. That makes mmcblk names nondeterministic even with aliases.
+
+Reserve the aliased host index for each main card. Continue dynamically
+allocating indices for eMMC boot and general-purpose subdevices.
+---
+ drivers/mmc/core/block.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -2323,1 +2323,5 @@
+-	devidx = ida_simple_get(&mmc_blk_ida, 0, max_devices, GFP_KERNEL);
++	if (!subname)
++		devidx = ida_simple_get(&mmc_blk_ida, card->host->index,
++				      card->host->index + 1, GFP_KERNEL);
++	else
++		devidx = ida_simple_get(&mmc_blk_ida, 0, max_devices, GFP_KERNEL);
+--
+2.43.0
