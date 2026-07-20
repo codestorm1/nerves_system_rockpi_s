@@ -1,9 +1,8 @@
 # Firmware configuration file for the Radxa ROCK Pi S (RK3308)
 #
-# DRAFT -- not yet build/boot tested. See fwup_include/fwup-common.conf for
-# the partition layout this depends on and the caveats around it. Modeled
-# after nerves_system_radxa_cm3's fwup.conf (a working Nerves system for a
-# different Rockchip SoC).
+# The complete image and both A/B upgrade directions are verified on hardware.
+# The layout was modeled after nerves_system_radxa_cm3 and adapted so each
+# RK3308 slot has its own kernel, device tree, and squashfs.
 #
 # IMPORTANT:
 # Edit `fwup.conf.eex` and run `mix generate_fwup_conf` to generate fwup.conf.
@@ -33,7 +32,7 @@ file-resource kernel.img {
 }
 
 file-resource board.dtb {
-    host-path = "${NERVES_SYSTEM}/images/rk3308-rock-s0.dtb"
+    host-path = "${NERVES_SYSTEM}/images/rk3308-rock-pi-s-no-wireless.dtb"
 }
 file-resource boot.scr {
     host-path = "${NERVES_SYSTEM}/images/boot.scr"
@@ -119,11 +118,11 @@ task complete {
     }
 
     on-resource kernel.img {
-        fat_write(${BOOT_PART_OFFSET}, "Image")
+        fat_write(${BOOT_PART_OFFSET}, "Image.a")
     }
 
     on-resource board.dtb {
-        fat_write(${BOOT_PART_OFFSET}, "rk3308-rock-s0.dtb")
+        fat_write(${BOOT_PART_OFFSET}, "rk3308-rock-pi-s-no-wireless.a.dtb")
     }
     on-resource boot.scr {
         fat_write(${BOOT_PART_OFFSET}, "boot.scr")
@@ -172,6 +171,18 @@ task upgrade.a {
         raw_write(${ROOTFS_A_PART_OFFSET})
     }
 
+    on-resource kernel.img {
+        fat_write(${BOOT_PART_OFFSET}, "Image.a")
+    }
+
+    on-resource board.dtb {
+        fat_write(${BOOT_PART_OFFSET}, "rk3308-rock-pi-s-no-wireless.a.dtb")
+    }
+
+    on-resource boot.scr {
+        fat_write(${BOOT_PART_OFFSET}, "boot.scr")
+    }
+
     on-finish {
         uboot_setenv(uboot-env, "a.nerves_fw_application_part0_devpath", ${NERVES_FW_APPLICATION_PART0_DEVPATH})
         uboot_setenv(uboot-env, "a.nerves_fw_application_part0_fstype", ${NERVES_FW_APPLICATION_PART0_FSTYPE})
@@ -217,6 +228,18 @@ task upgrade.b {
         delta-source-raw-offset=${ROOTFS_A_PART_OFFSET}
         delta-source-raw-count=${ROOTFS_A_PART_COUNT}
         raw_write(${ROOTFS_B_PART_OFFSET})
+    }
+
+    on-resource kernel.img {
+        fat_write(${BOOT_PART_OFFSET}, "Image.b")
+    }
+
+    on-resource board.dtb {
+        fat_write(${BOOT_PART_OFFSET}, "rk3308-rock-pi-s-no-wireless.b.dtb")
+    }
+
+    on-resource boot.scr {
+        fat_write(${BOOT_PART_OFFSET}, "boot.scr")
     }
 
     on-finish {

@@ -8,3 +8,7 @@ CONFIG_EXT4_FS=y
 # Mount the FAT boot partition from Linux when servicing boot.scr.
 CONFIG_NLS_CODEPAGE_437=y
 CONFIG_NLS_ISO8859_1=y
+
+# The real RK3308 codec should be ALSA card 0 and the default PCM. The vendor
+# defconfig enables the synthetic loopback card, which otherwise claims card 0.
+# CONFIG_SND_ALOOP is not set

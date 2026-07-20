@@ -12,9 +12,8 @@ This is a from-scratch port, combining pieces of two working references:
   Rockchip blobs, boot-ROM-mandated flash offsets).
 - [`nerves_system_radxa_cm3`](https://github.com/sportalliance/nerves_system_radxa_cm3) --
   a working Nerves system for a *different* Rockchip SoC (RK3566). It's the
-  source for the Nerves-specific architecture: boot-from-rootfs (no separate
-  FAT boot partition), the baked U-Boot environment / A-B switching logic,
-  and the fwup partition layout pattern.
+  source for the Nerves-specific A/B switching logic and fwup partition layout
+  pattern.
 
 ## Status: Linux 5.10 boots Nerves on ROCK Pi S hardware
 
@@ -22,13 +21,14 @@ This is a from-scratch port, combining pieces of two working references:
 (`../rockpi_s_smoke_test`), and the resulting firmware boots Linux 5.10.209,
 mounts the squashfs root, starts Erlang/OTP 27 and reaches IEx on real ROCK Pi
 S hardware. UART0 remains usable at 115200 throughout boot, Ethernet links at
-100 Mbps, and userspace GPIO was verified with `Circuits.GPIO` on GPIO 15.
+100 Mbps, userspace GPIO was verified with `Circuits.GPIO` on GPIO 15, and
+full A/B updates have been verified over Ethernet in both directions.
 
 What's retained from the known-working plain-Buildroot config (high
 confidence):
 
 - U-Boot source/pin: `radxa/u-boot.git` @ `233a23e3ed0b3e5250253ee455c3c5df2080f99c`, `rock-pi-s-rk3308` defconfig
-- Kernel source/version: `radxa/kernel.git` branch `linux-5.10-gen-rkr8-buildroot`, `rk3308_linux` defconfig, in-tree DTS `rockchip/rk3308-rock-s0`
+- Kernel source/version: `radxa/kernel.git` branch `linux-5.10-gen-rkr8-buildroot`, `rk3308_linux` defconfig, with shared ROCK Pi S hardware plus explicit wireless and no-wireless DTS variants; this target selects `rockchip/rk3308-rock-pi-s-no-wireless`
 - Rockchip blobs: DDR init, ATF bl31, miniloader (`board/`), and the `rkbin` package providing `loaderimage`/`trust_merger` (`package/rkbin/`)
 - Boot-ROM-mandated flash offsets: idbloader@32K, uboot.img@8M, trust.img@12M (from `buildroot.rockchip.ext/board/RK3308/genimage.cfg`)
 
@@ -36,7 +36,7 @@ What's **adapted from a working Nerves system for a different chip**
 (medium confidence -- the pattern is proven, the RK3308-specific values
 aren't):
 
-- FAT boot partition containing the kernel Image, device tree and `boot.scr`,
+- FAT boot partition containing per-slot kernel Images and device trees plus `boot.scr`,
   followed by Nerves A/B squashfs root partitions and an application-data
   partition.
 - `uboot/boot.env` -- the baked-in U-Boot environment with Nerves A/B slot
@@ -63,13 +63,8 @@ in the gaps `fwup_include/fwup-common.conf` reserves for them
 (32K-8M, 8M-12M, 12M-15M), so no partition collision there. Phase 0's
 `sdcard.img` itself has not been boot-tested on real hardware yet.
 
-UART0 console: the original plain-Buildroot config enables it via a
-`rk3308-uart0` DT overlay. That overlay is in-tree in the kernel source
-(confirmed present in the Phase 0 build output) -- `BR2_LINUX_KERNEL_
-DTB_OVERLAY_SUPPORT` enables *compiling* it, but Buildroot doesn't install
-overlays into the target on its own, so `post-build.sh` now copies them
-into `/boot`, and `rootfs_overlay/boot/vars.txt` sets
-`overlays=rk3308-uart0` to load it. Not build-tested yet.
+UART0 console is enabled directly in the ported ROCK Pi S base device tree;
+no runtime device-tree overlay is required.
 
 Resolved by actually getting `mix firmware` to complete (each was a real
 build failure, fixed and documented in `nerves_defconfig`/patches, not
@@ -94,11 +89,15 @@ speculative):
   building successfully before that point. Use a real companion app (like
   `../rockpi_s_smoke_test`) to get an actual bootable `.fw`.
 
-What's **still genuinely unresolved**:
+The application-data partition mounts at `/root`, and A/B updates stage the
+inactive slot's rootfs, kernel, and device tree before switching slots. This
+was verified on hardware with A-to-B and B-to-A Ethernet uploads, automatic
+validation, and persistence reboots.
 
-- The application-data partition is detected as `/dev/mmcblk2p4` but is not
-  mounted automatically yet, so Nerves reports its usage as unavailable.
-- A/B firmware updates have not been tested on the Linux 5.10 build.
+The validated ROCK Pi S is the variant without a populated wireless module,
+so this target disables its WLAN, Bluetooth, and associated SDIO nodes. The
+alternate `rk3308-rock-pi-s-wireless.dtb` enables the AP6212 combo module for
+wireless board variants. Ethernet is the supported interface on this target.
 
 ## Plan
 
@@ -110,8 +109,8 @@ What's **still genuinely unresolved**:
    `.fw`.
 3. ~~Burn to an SD card and confirm it boots to an IEx console~~ -- done on
    real ROCK Pi S hardware with Linux 5.10.209 and UART0 at 115200n8.
-4. Confirm A/B firmware updates work (`mix firmware.upgrade`), which
-   exercises the `uboot_setenv` logic in `fwup.conf.eex`.
+4. ~~Confirm full A/B firmware updates~~ -- done in both directions over
+   Ethernet, including per-slot kernel/device-tree selection and validation.
 5. Once this boots reliably, adapt it for the ROCK S Core (rCore) SoM.
 
 ## Layout

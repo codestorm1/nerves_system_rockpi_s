@@ -9,10 +9,8 @@ set -e
 #
 # This is a port of buildroot.rockchip.ext/board/RK3308/post-image.sh's
 # blob-packing steps to Nerves' BR2_ROOTFS_POST_IMAGE_SCRIPT conventions.
-# Unlike that plain-Buildroot script, this does NOT stage a kernel Image,
-# device tree or boot.scr into $BINARIES_DIR -- those are installed
-# straight into the rootfs's /boot by BR2_LINUX_KERNEL_INSTALL_TARGET and
-# rootfs_overlay/boot, and loaded from there by uboot/boot.env at runtime.
+# The kernel Image, selected device tree, and generated boot.scr are already
+# staged in $BINARIES_DIR for fwup to place on the shared FAT boot partition.
 #
 
 FWUP_CONFIG=$NERVES_DEFCONFIG_DIR/fwup.conf
