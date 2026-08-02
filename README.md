@@ -57,7 +57,7 @@ This port combines two working references:
 
 - [`buildroot.rockchip.ext`](https://github.com/flatmax/buildroot.rockchip) -- a plain
   Buildroot external tree Radxa has confirmed boots on this exact hardware.
-  Source for the RK3308-specific boot chain: U-Boot/kernel pins, Rockchip
+  Source for the RK3308-specific boot chain: the U-Boot pin, Rockchip
   blobs, and the boot-ROM-mandated flash offsets (idbloader@32K,
   uboot.img@8M, trust.img@12M).
 - [`nerves_system_radxa_cm3`](https://github.com/sportalliance/nerves_system_radxa_cm3) --
@@ -65,12 +65,18 @@ This port combines two working references:
   for the Nerves-specific A/B switching logic and fwup partition layout
   pattern (`uboot/boot.env`, `fwup.conf.eex` / `fwup_include/fwup-common.conf`).
 
-Boot chain pins, all inherited from the known-working plain-Buildroot config:
+Boot chain pins:
 
-- U-Boot: `radxa/u-boot.git` @ `233a23e3ed0b3e5250253ee455c3c5df2080f99c`, `rock-pi-s-rk3308` defconfig
-- Kernel: `radxa/kernel.git` branch `linux-5.10-gen-rkr8-buildroot`, `rk3308_linux` defconfig
+- U-Boot: `radxa/u-boot.git` @ `233a23e3ed0b3e5250253ee455c3c5df2080f99c`, `rock-pi-s-rk3308`
+  defconfig -- inherited directly from `buildroot.rockchip.ext`.
+- Kernel: `radxa/kernel.git` branch `linux-5.10-gen-rkr8-buildroot`, `rk3308_linux` defconfig --
+  chosen independently, *not* inherited from `buildroot.rockchip.ext` (its history only ever
+  used `radxa/kernel.git`'s Linux 4.4 branch, then a separate `piter75/rockchip-kernel` fork for
+  5.10). Confidence here comes entirely from this system's own hardware boot-testing, not from
+  the reference tree.
 - Rockchip blobs: DDR init, ATF BL31, miniloader (`board/`), plus the
-  `rkbin` package providing `loaderimage`/`trust_merger` (`package/rkbin/`)
+  `rkbin` package providing `loaderimage`/`trust_merger` (`package/rkbin/`) --
+  inherited directly from `buildroot.rockchip.ext`.
 
 Device tree: this target selects `rockchip/rk3308-rock-pi-s-no-wireless`.
 The base tree ships both a `-no-wireless` and a `-wireless` DTS (the latter
