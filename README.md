@@ -78,6 +78,17 @@ Boot chain pins:
   `rkbin` package providing `loaderimage`/`trust_merger` (`package/rkbin/`) --
   inherited directly from `buildroot.rockchip.ext`.
 
+**U-Boot override:** the U-Boot binary that actually ships is not the one
+Buildroot just compiled from the pin above -- `post-createfs.sh` overwrites
+it with the pinned checkpoint binary in `known_good/uboot.img` ("Keep the
+bootloader override until the persistent U-Boot environment is fully
+reproduced from source"). See `known_good/README.md` for exactly what that
+binary is, its checksums, and why it's there. Buildroot's own U-Boot build
+still has to succeed regardless -- `post-createfs.sh` uses that build's
+compiled `mkimage` tool to pack `board/`'s DDR-init and miniloader blobs
+into `idbloader.img` -- it's just the resulting `uboot.img` itself that
+gets swapped out.
+
 Device tree: this target selects `rockchip/rk3308-rock-pi-s-no-wireless`.
 The base tree ships both a `-no-wireless` and a `-wireless` DTS (the latter
 enabling the AP6212 combo module) for boards with a populated wireless
