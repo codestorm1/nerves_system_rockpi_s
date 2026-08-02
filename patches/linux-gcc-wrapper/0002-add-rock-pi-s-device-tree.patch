@@ -7,10 +7,10 @@ wireless and no-wireless board variants so absent AP6212 hardware is neither
 probed nor lost as a supported configuration.
 ---
  arch/arm64/boot/dts/rockchip/Makefile                         | 2 +
- arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s.dtsi           | 430 ++++++++++++++++++++
+ arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s.dtsi           | 437 ++++++++++++++++++++
  arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s-no-wireless.dts| 10 +
  arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s-wireless.dts   | 22 +
- 4 files changed, 464 insertions(+)
+ 4 files changed, 471 insertions(+)
  create mode 100644 arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s.dtsi
  create mode 100644 arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s-no-wireless.dts
  create mode 100644 arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s-wireless.dts
@@ -31,7 +31,7 @@ diff --git a/arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s.dtsi b/arch/arm64/boo
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s.dtsi
-@@ -0,0 +1,430 @@
+@@ -0,0 +1,437 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * Copyright (c) 2018 Fuzhou Rockchip Electronics Co., Ltd
@@ -252,6 +252,15 @@ new file mode 100644
 +	cpu-supply = <&vdd_core>;
 +};
 +
++/*
++ * Disabled here vs. "okay" in the upstream reference DTS this file was
++ * ported from, for reasons lost to history -- predates this from-scratch
++ * port and hasn't been revisited since. CONFIG_ARM_ROCKCHIP_DMC_DEVFREQ is
++ * built into this kernel, so it's not a no-op, but only the userspace
++ * devfreq governor is enabled (no ondemand/performance), so DDR frequency
++ * wouldn't scale automatically either way. Worth investigating whether
++ * enabling this helps or was disabled for a real reason.
++ */
 +&dmc {
 +	center-supply = <&vdd_log>;
 +	status = "disabled";
