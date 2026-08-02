@@ -14,7 +14,7 @@ Erlang/OTP 27 to an IEx console. Verified working:
 - Userspace GPIO (`Circuits.GPIO`)
 - Full A/B firmware updates over Ethernet, in both directions, including
   automatic validation and persistence across reboots
-- Hardware watchdog, I2C1, I2S receive
+- Hardware watchdog, I2C1, I2S receive, SPI2 (`/dev/spidev2.0`)
 
 Not yet done: the wireless (AP6212 Wi-Fi/BT) board variant is wired up in
 the device tree but untested -- only the no-wireless variant has been run
