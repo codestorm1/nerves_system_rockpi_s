@@ -35,7 +35,9 @@ defmodule NervesSystemRockpiS.MixProject do
   defp nerves_package do
     [
       type: :system,
-      artifact_sites: [],
+      artifact_sites: [
+        {:github_releases, "codestorm1/nerves_system_rockpi_s"}
+      ],
       build_runner_opts: build_runner_opts(),
       platform: Nerves.System.BR,
       platform_config: [
