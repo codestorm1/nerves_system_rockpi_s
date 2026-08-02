@@ -116,3 +116,14 @@ wireless board variants. Ethernet is the supported interface on this target.
 ## Layout
 
 See `fwup_include/fwup-common.conf` for the full partition/offset diagram.
+
+## License
+
+Licensed under the Apache License, Version 2.0 (see `LICENSE`), consistent
+with the rest of the Nerves ecosystem.
+
+`board/` and `package/rkbin/` pull in Rockchip's binary DDR init, ATF BL31,
+and miniloader blobs (via [`radxa/rkbin`](https://github.com/radxa/rkbin)).
+These are unmodified, closed-source vendor binaries redistributed as-is --
+the same binaries already publicly distributed by Radxa and Rockchip -- and
+are not covered by this project's license.

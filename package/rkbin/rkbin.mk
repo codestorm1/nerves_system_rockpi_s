@@ -5,7 +5,7 @@
 ################################################################################
 
 RKBIN_VERSION = fc44f9401c127affb2a879c1e90fa89ddab505f6
-RKBIN_SITE = git@github.com:radxa/rkbin.git
+RKBIN_SITE = https://github.com/radxa/rkbin.git
 RKBIN_SITE_METHOD = git
 RKBIN_INSTALL_IMAGES = YES
 
