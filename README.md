@@ -22,7 +22,7 @@ on hardware. The ROCK S Core (rCore) SoM is unsupported.
 
 ## Requirements
 
-- Elixir/Erlang and `fwup` per `.tool-versions`
+- asdf, Elixir/Erlang and `fwup` per `.tool-versions`
 - A Linux host to run Buildroot (see the
   [Nerves installation guide](https://hexdocs.pm/nerves/installation.html)
   for the usual native build dependencies)
