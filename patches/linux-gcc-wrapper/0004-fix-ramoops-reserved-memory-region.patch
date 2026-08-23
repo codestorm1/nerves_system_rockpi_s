@@ -1,0 +1,78 @@
+From: Nerves ROCK Pi S maintainers <noreply@example.com>
+Subject: [PATCH] arm64: dts: rockchip: rk3308: fix ramoops devicetree bugs
+
+Two independent bugs left ramoops non-functional, so a kernel panic or
+hard reset left nothing behind in /sys/fs/pstore to read back after
+reboot:
+
+1. ramoops_mem was a sibling of /reserved-memory instead of a child of
+   it, so early_init_dt_scan_reserved_mem() never registered it. Worse,
+   this kernel's ramoops driver (fs/pstore/ram.c, no
+   RESERVEDMEM_OF_DECLARE for "ramoops") doesn't actually resolve the
+   region via the memory-region phandle at all - of_reserved_mem_lookup()
+   matches the ramoops platform device's own node name ("ramoops")
+   against the basename of a /reserved-memory child. The old
+   "ramoops@110000" unit-address suffix never matched, so it always hit
+   "ramoops: failed to locate DT /reserved-memory resource". Moving the
+   node under /reserved-memory and dropping the unit address (naming it
+   plainly "ramoops") makes the lookup-by-name succeed; the label is kept
+   so the existing `memory-region = <&ramoops_mem>` reference still
+   resolves for any future kernel that does honor it. `no-map` is added
+   so the kernel never repurposes this RAM for anything else, which is
+   required for the crash log to survive a panic uncorrupted.
+
+2. record-size and console-size were written as 2-cell (64-bit) values
+   (e.g. `<0x0 0x30000>`), but ramoops_parse_dt_u32() reads them with
+   of_property_read_u32(), which only consumes the first cell - so both
+   silently evaluated to 0. With no non-zero record/console size, probe
+   failed with "The memory size and the record/console size must be
+   non-zero" even after fix #1. Rewritten as single-cell values so the
+   real sizes (0x30000 record + 0xc0000 console = the full 0xf0000
+   region) are actually read.
+
+Verified on hardware: after this patch, `dmesg | grep ramoops` shows
+"using 0xf0000@0x110000" and "Registered ramoops as persistent store
+backend" instead of the probe failure, and after a forced panic
+(`echo c > /proc/sysrq-trigger`) followed by reboot,
+/sys/fs/pstore/dmesg-ramoops-0 contains the panic log.
+---
+ arch/arm64/boot/dts/rockchip/rk3308.dtsi | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/rockchip/rk3308.dtsi b/arch/arm64/boot/dts/rockchip/rk3308.dtsi
+--- a/arch/arm64/boot/dts/rockchip/rk3308.dtsi
++++ b/arch/arm64/boot/dts/rockchip/rk3308.dtsi
+@@ -355,17 +355,12 @@
+ 		method = "smc";
+ 	};
+
+-	ramoops_mem: ramoops_mem {
+-		reg = <0x0 0x110000 0x0 0xf0000>;
+-		reg-names = "ramoops_mem";
+-	};
+-
+ 	ramoops: ramoops {
+ 		compatible = "ramoops";
+-		record-size = <0x0 0x30000>;
+-		console-size = <0x0 0xc0000>;
+-		ftrace-size = <0x0 0x00000>;
+-		pmsg-size = <0x0 0x00000>;
++		record-size = <0x30000>;
++		console-size = <0xc0000>;
++		ftrace-size = <0x0>;
++		pmsg-size = <0x0>;
+ 		memory-region = <&ramoops_mem>;
+ 	};
+
+@@ -399,6 +394,11 @@
+ 		#size-cells = <2>;
+ 		ranges;
+
++		ramoops_mem: ramoops {
++			reg = <0x0 0x110000 0x0 0xf0000>;
++			no-map;
++		};
++
+ 		drm_logo: drm-logo@00000000 {
+ 			compatible = "rockchip,drm-logo";
+ 			reg = <0x0 0x0 0x0 0x0>;
