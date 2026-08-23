@@ -12,3 +12,16 @@ CONFIG_NLS_ISO8859_1=y
 # The real RK3308 codec should be ALSA card 0 and the default PCM. The vendor
 # defconfig enables the synthetic loopback card, which otherwise claims card 0.
 # CONFIG_SND_ALOOP is not set
+
+# USB host support. The vendor defconfig has CONFIG_USB unset entirely, even
+# though the devicetree already enables a dedicated host controller
+# (usb_host0_ehci/usb_host0_ohci, both "generic-ehci"/"generic-ohci" -
+# separate from the usb20_otg port) - so nothing plugged into the host port
+# was ever recognized, regardless of what device it was. EHCI/OHCI cover the
+# dedicated host port; SND_USB_AUDIO adds USB audio class device support.
+CONFIG_USB=y
+CONFIG_USB_EHCI_HCD=y
+CONFIG_USB_EHCI_HCD_PLATFORM=y
+CONFIG_USB_OHCI_HCD=y
+CONFIG_USB_OHCI_HCD_PLATFORM=y
+CONFIG_SND_USB_AUDIO=y
