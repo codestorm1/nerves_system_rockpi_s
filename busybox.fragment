@@ -1,1 +1,10 @@
 CONFIG_DEPMOD=y
+
+# nice/chrt: this board has no cgroup filesystem support (erlinit fails to
+# mount tmpfs at /sys/fs/cgroup at all), so anything that needs to run a
+# CPU-heavy job without starving the rest of the system - e.g. mutebox's
+# whisper.cpp transcription - can't use the usual cgroup-based
+# SCHED_IDLE approach and needs a plain per-process priority/scheduling
+# knob instead.
+CONFIG_NICE=y
+CONFIG_CHRT=y
