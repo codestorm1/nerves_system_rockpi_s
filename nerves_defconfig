@@ -138,7 +138,10 @@ BR2_PACKAGE_ALSA_UTILS_SPEAKER_TEST=y
 
 # Releases are assembled by the host Erlang VM. Keep the target OTP major in
 # sync with the project's host OTP; OTP 27 cannot parse OTP 29 BEAM atom chunks.
-BR2_PACKAGE_ERLANG_27=y
+# Bumped to 28 to match the project's host toolchain (erlang 28.5 /
+# elixir 1.20.2-otp-28); the post-image `mix generate_fwup_conf` step runs
+# on Buildroot's host-erlang, which tracks this choice.
+BR2_PACKAGE_ERLANG_28=y
 
 # Keep the libnl compatibility patch for now; it is harmless with the
 # newer kernel headers and can be removed after a complete clean build
