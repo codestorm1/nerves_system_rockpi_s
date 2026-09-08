@@ -136,6 +136,12 @@ BR2_PACKAGE_ALSA_UTILS_APLAY=y
 BR2_PACKAGE_ALSA_UTILS_AMIXER=y
 BR2_PACKAGE_ALSA_UTILS_SPEAKER_TEST=y
 
+# sox: Mutebox.Audio.SpectralAnalyzer pipes each capture window through
+# `sox - -n stat` for the spectral-mute path. buildroot dropped the
+# chromaprint package, so fpcalc (Mutebox.AudioProcessor fingerprinting)
+# is carried as a prebuilt binary in rootfs_overlay/usr/bin/fpcalc instead.
+BR2_PACKAGE_SOX=y
+
 # Releases are assembled by the host Erlang VM. Keep the target OTP major in
 # sync with the project's host OTP; OTP 27 cannot parse OTP 29 BEAM atom chunks.
 # Bumped to 28 to match the project's host toolchain (erlang 28.5 /
